@@ -16,8 +16,7 @@ def get_github_activities(keywords):
         "repositories": [],
         "commits": [],
         "issues": [],
-        "wikis": [],
-        "users": []
+        "wikis": []
     }
     driver = webdriver.Chrome()
     driver.get("https://github.com/")
@@ -40,5 +39,5 @@ def get_github_activities(keywords):
             search_results[key].append(res_int)
             time.sleep(random.randrange(11, 21)) # 休息 10 秒以上才不會被 GitHub 擋掉
     search_results['key_word'] = list(keywords)
-    df = pd.DataFrame(search_results, columns = ['key_word', 'repositories', 'commits', 'issues', 'wikis', 'users'])
+    df = pd.DataFrame(search_results, columns = ['key_word', 'repositories', 'commits', 'issues', 'wikis'])
     return(df)
