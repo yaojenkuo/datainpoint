@@ -13,3 +13,7 @@ Related contents of my Medium publication: [DataInPoint](https://medium.com/data
 - get_tidy_df.R
 - get_zipped_csv.R
 - gapminder_replica_shinyapp
+
+## 從 pandas 開始 Python 與資料科學之旅 - 仿效 Tidyverse 的學習模式
+
+- learn_pd_like_tidyverse.ipynb
