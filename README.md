@@ -17,3 +17,11 @@ Related contents of my Medium publication: [DataInPoint](https://medium.com/data
 ## 從 pandas 開始 Python 與資料科學之旅 - 仿效 Tidyverse 的學習模式
 
 - learn_pd_like_tidyverse.ipynb
+
+## 臺北馬拉松參賽選手水平逐漸提升 - 近七年臺北馬拉松完賽時間的資料擷取與視覺化
+
+- get_runner_record.py
+- write_concatenated_df.py
+- get_time_group.R
+- draw_ggplots.R
+- taipei_marathon_analysis.ipynb
