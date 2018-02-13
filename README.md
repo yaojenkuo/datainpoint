@@ -25,3 +25,10 @@ Related contents of my Medium publication: [DataInPoint](https://medium.com/data
 - get_time_group.R
 - draw_ggplots.R
 - taipei_marathon_analysis.ipynb
+
+## Johns Hopkins R Programming 的第二週作業 - 透過練習精進 R 語言程式設計
+
+- complete.R
+- corr.R
+- get_specdata.R
+- pollutantmean.R
