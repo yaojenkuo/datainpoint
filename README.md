@@ -26,9 +26,15 @@ Related contents of my Medium publication: [DataInPoint](https://medium.com/data
 - draw_ggplots.R
 - taipei_marathon_analysis.ipynb
 
-## Johns Hopkins R Programming 的第二週作業 - 透過練習精進 R 語言程式設計
+## Johns Hopkins R Programming 的第二週作業：Air Pollution - 透過練習精進 R 語言程式設計
 
 - complete.R
 - corr.R
 - get_specdata.R
 - pollutantmean.R
+
+## Johns Hopkins R Programming 的第四週作業：Hospital Quality - 透過練習精進 R 語言程式設計
+
+- best.R
+- rankhospital.R
+- rankall.R
