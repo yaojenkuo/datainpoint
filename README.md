@@ -38,3 +38,11 @@ Related contents of my Medium publication: [DataInPoint](https://medium.com/data
 - best.R
 - rankhospital.R
 - rankall.R
+
+## University of Michigan Introduction to Data Science in Python 的第二週作業：Pandas Introduction(Part 1) - 透過練習精進 Python 資料科學應用
+
+- <https://drive.google.com/file/d/1SU4RqATsmOvtRHjGkPIyake8pp8IkYT_/view?usp=sharing>
+
+## University of Michigan Introduction to Data Science in Python 的第二週作業：Pandas Introduction(Part 2) - 透過練習精進 Python 資料科學應用
+
+- <https://drive.google.com/file/d/1-tUwDh3Efiv-sWPA9ZtIg-TU-YxmSSQQ/view?usp=sharing>
