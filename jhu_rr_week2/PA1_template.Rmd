@@ -1,0 +1,160 @@
+---
+title: "Reproducible Research: Activity Monotoring Data"
+author: "Yao-Jen Kuo"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading required packages
+
+```{r message=FALSE, warning=FALSE}
+library(magrittr)
+library(dplyr)
+library(ggplot2)
+```
+
+## Loading and preprocessing the data
+
+```{r}
+# get_data: Get required data into a df
+get_data <- function() {
+  #data_url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+  #download.file(data_url, destfile = "~/Downloads/activity_monitoring_data.zip") # 下載壓縮檔
+  #unzip("~/Downloads/activity_monitoring_data.zip", exdir = "~/Downloads/") # 解壓縮
+  df <- read.csv("activity.csv", stringsAsFactors = FALSE)
+  df$date <- as.Date(df$date)
+  return(df)
+}
+df <- get_data()
+```
+
+## What is mean total number of steps taken per day?
+
+Calculate the total number of steps taken per day.
+
+```{r}
+summarized_df <- df %>%
+  group_by(date) %>%
+  summarise(ttl_steps = sum(steps, na.rm = TRUE))
+summarized_df
+```
+
+Make a histogram of the total number of steps taken each day.
+
+```{r}
+ggplot(summarized_df, aes(x = ttl_steps)) +
+  geom_histogram(bins = 10, fill = rgb(1, 0, 0, 0.5)) +
+  xlab("") +
+  ggtitle("每日步數") +
+  theme_minimal() +
+  theme(text = element_text(family = "Heiti TC Light"))
+```
+
+Calculate and report the mean and median of the total number of steps taken per day.
+
+```{r}
+mean_ttl_steps <- mean(summarized_df$ttl_steps)
+median_ttl_steps <- median(summarized_df$ttl_steps)
+mean_ttl_steps
+median_ttl_steps
+```
+
+## What is the average daily activity pattern?
+
+Make a time series plot (i.e. 𝚝𝚢𝚙𝚎 = "𝚕") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+```{r}
+summarized_df <- df %>%
+  group_by(interval) %>%
+  summarise(avg_steps = mean(steps, na.rm = TRUE))
+
+ggplot(summarized_df, aes(x = interval, y = avg_steps)) +
+  geom_line(color = "red") +
+  theme_minimal()
+```
+
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r}
+max_steps <- max(summarized_df$avg_steps)
+summarized_df %>%
+  filter(avg_steps == max_steps)
+```
+
+## Imputing missing values
+
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with 𝙽𝙰s.
+
+```{r}
+is_complete <- complete.cases(df)
+sum(!is_complete)
+```
+
+Devise a strategy for filling in all of the missing values in the dataset: the mean for 5-minute interval.
+
+```{r}
+interval_avg <- df %>%
+  group_by(interval) %>%
+  summarise(avg_steps = mean(steps, na.rm = TRUE))
+```
+
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+df_imputed <- df
+for (i in 1:nrow(df_imputed)) {
+  if (is.na(df_imputed[i, "steps"]) == TRUE) {
+    data_interval <- df_imputed[i, "interval"]
+    imputed_value <- interval_avg[interval_avg$interval == data_interval, "avg_steps"]
+    df_imputed[i, "steps"] <- imputed_value
+  } else {
+    df_imputed[i, "steps"] <- df_imputed[i, "steps"]
+  }
+}
+```
+
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+```{r}
+summarized_df <- df_imputed %>%
+  group_by(date) %>%
+  summarise(ttl_steps = sum(steps, na.rm = TRUE))
+
+ggplot(summarized_df, aes(x = ttl_steps)) +
+  geom_histogram(bins = 10, fill = rgb(1, 0, 0, 0.5)) +
+  xlab("") +
+  ggtitle("每日步數") +
+  theme_minimal() +
+  theme(text = element_text(family = "Heiti TC Light"))
+
+mean_ttl_steps <- mean(summarized_df$ttl_steps)
+median_ttl_steps <- median(summarized_df$ttl_steps)
+mean_ttl_steps
+median_ttl_steps
+```
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+For this part the 𝚠𝚎𝚎𝚔𝚍𝚊𝚢𝚜() function may be of some help here. Use the dataset with the filled-in missing values for this part.
+
+Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+```{r}
+df$weekday_indicator <- ifelse(weekdays(df$date) %in% c("Saturday", "Sunday"), "weekend", "weekday")
+```
+
+Make a panel plot containing a time series plot (i.e. 𝚝𝚢𝚙𝚎 = "𝚕") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+
+```{r}
+summarized_df <- df %>%
+  group_by(interval, weekday_indicator) %>%
+  summarise(avg_steps = mean(steps, na.rm = TRUE))
+
+ggplot(summarized_df, aes(x = interval, y = avg_steps)) +
+  geom_line(color = "red") +
+  facet_wrap(~weekday_indicator) +
+  theme_minimal()
+```
