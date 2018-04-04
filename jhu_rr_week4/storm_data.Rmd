@@ -1,0 +1,156 @@
+---
+title: "US Storm Data: Tornadoes and Floods Cause Maximum Damage"
+author: "Yao-Jen Kuo"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+knitr::opts_chunk$set(echo = TRUE)
+options(knitr.table.format = "html")
+```
+
+## Summary
+
+Discovering through the storm data across the United States from 1950 to 2011, evidence suggests that **tornadoes** and **floods** cause maximum damage to human life and property, respectively.
+
+## Required Packages
+
+```{r eval=FALSE}
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+knitr::opts_chunk$set(echo = TRUE)
+options(knitr.table.format = "html")
+```
+
+## Data Processing
+
+Use `read.csv()` directly to import a `csv.bz2` file.
+
+```{r cache=TRUE}
+data_url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+data_path <- "~/Downloads/StormData.csv.bz2"
+download.file(data_url, destfile = data_path)
+storm_data <- read.csv(data_path, stringsAsFactors = FALSE)
+```
+
+## Exploring Data
+
+Our data has **902297** observations and **37** variables. The weather events are categorized as **985** types. Let's take a quick look at the top 100 weather events.
+
+```{r}
+storm_data %>%
+  head() %>%
+  kable() %>%
+  kable_styling() %>%
+  scroll_box(width = "100%")
+dim(storm_data)
+length(unique(storm_data$EVTYPE))
+top100_events <- storm_data %>%
+  group_by(EVTYPE) %>%
+  summarise(CNT = n()) %>%
+  arrange(desc(CNT)) %>%
+  head(n = 100)
+top100_events %>%
+  kable() %>%
+  kable_styling() %>%
+  scroll_box(height = "300px")
+```
+
+## Mapping Events
+
+We've observed quite a few event types indicate the same weather event with only a bit different wording. Let's group those events into a more general group such as **HEAT**, **WIND**, **HURRICANE**, **FLOOD**, **HURRICANE**, and **STORM**.
+
+```{r}
+storm_data$NEW_EVTYPE <- toupper(storm_data$EVTYPE)
+is_heat <- grepl(pattern = "HEAT", storm_data$NEW_EVTYPE)
+is_wind <- grepl(pattern = "WIND", storm_data$NEW_EVTYPE)
+is_flood <- grepl(pattern = "FLOOD", storm_data$NEW_EVTYPE)
+is_hurricane <- grepl(pattern = "HURRICANE", storm_data$NEW_EVTYPE)
+is_storm <- grepl(pattern = "STORM", storm_data$NEW_EVTYPE)
+filter_list <- list(is_heat, is_wind, is_hurricane, is_flood, is_storm)
+new_evtypes <- c("HEAT", "WIND", "HURRICANE", "FLOOD", "STORM")
+for (i in 1:length(filter_list)) {
+  storm_data$NEW_EVTYPE[filter_list[[i]]] <- new_evtypes[i]
+}
+```
+
+## Adjusting Units
+
+The damage to crops and properties are tabulated using two columns, one containing the numerical value and the other containing the unit. Damages that are in millions and billions represented as 'M/m' for millions and 'b/B' for billions.
+
+```{r}
+iterators_vec <- c("PROPDMGEXP", "CROPDMGEXP")
+
+for (EXP in iterators_vec) {
+  storm_data[, EXP] <- tolower(storm_data[, EXP])
+  storm_data[, EXP] <- ifelse(storm_data[, EXP] == "m", 1e+06, ifelse(storm_data[, EXP] == "b", 1e+09, 0))
+}
+storm_data$TOTALPROPDMG <- storm_data$PROPDMG * storm_data$PROPDMGEXP
+storm_data$TOTALCROPDMG <- storm_data$CROPDMG * storm_data$CROPDMGEXP
+```
+
+## Results
+
+#### Across the United States, which types of events (as indicated in the ETYPE variable) are most harmful with respect to population health?
+
+```{r}
+top6_pop_dmg <- storm_data %>%
+  mutate(FATALITIES_INJURIES = FATALITIES + INJURIES) %>%
+  group_by(NEW_EVTYPE) %>%
+  summarise(POP_HEALTH = sum(FATALITIES_INJURIES)) %>%
+  arrange(desc(POP_HEALTH)) %>%
+  head()
+event_order <- rev(top6_pop_dmg$NEW_EVTYPE)
+top6_pop_dmg$NEW_EVTYPE <- factor(top6_pop_dmg$NEW_EVTYPE, levels = event_order)
+top6_pop_dmg %>%
+  kable() %>%
+  kable_styling()
+ggplot(top6_pop_dmg, aes(x = NEW_EVTYPE, y = POP_HEALTH, fill = NEW_EVTYPE)) +
+  geom_bar(stat = "identity") +
+  xlab("Event") +
+  ylab("Injuries and Fatalities") +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  ggtitle("Top 6 Harmful Events for Population Health")
+```
+
+Across the United States, **tornado** is the most harmful with respect to population health.
+
+#### Across the United States, which types of events have the greatest economic consequences?
+
+```{r}
+top6_eco_dmg <- storm_data %>%
+  mutate(TTLDMG = TOTALPROPDMG + TOTALCROPDMG) %>%
+  group_by(NEW_EVTYPE) %>%
+  summarise(ECONOMIC_CONSEQUENCE = sum(TTLDMG)) %>%
+  arrange(desc(ECONOMIC_CONSEQUENCE)) %>%
+  head()
+event_order <- rev(top6_eco_dmg$NEW_EVTYPE)
+top6_eco_dmg$NEW_EVTYPE <- factor(top6_eco_dmg$NEW_EVTYPE, levels = event_order)
+top6_eco_dmg %>%
+  kable() %>%
+  kable_styling()
+ggplot(top6_eco_dmg, aes(x = NEW_EVTYPE, y = ECONOMIC_CONSEQUENCE, fill = NEW_EVTYPE)) +
+  geom_bar(stat = "identity") +
+  xlab("Event") +
+  ylab("Properties and Crops") +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  ggtitle("Top 6 Harmful Events for Economic Consequences")
+```
+
+Across the United States, **flood** is the most harmful with respect to population health.
