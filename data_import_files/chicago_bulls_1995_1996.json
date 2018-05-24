@@ -1,0 +1,21 @@
+{
+    "team_name": "Chicago Bulls",
+    "records": {
+        "wins": 72,
+        "losses": 10
+    },
+    "coach": "Phil Jackson",
+    "assistant_coach": [
+        "Jim Cleamons",
+        "John Paxson",
+        "Jimmy Rodgers",
+        "Tex Winter"
+    ],
+    "starting_lineups": {
+        "PG": "Ron Harper",
+        "SG": "Michael Jordan",
+        "SF": "Scottie Pippen",
+        "PF": "Dennis Rodman",
+        "C": "Luc Longley"
+    }
+}
